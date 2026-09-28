@@ -184,8 +184,6 @@ def create_app():
 
     return app
 
-
-# ---------------------------------------------------------------------------
 # Entry point
 # Only runs when you execute "python app.py" directly,
 # NOT when a WSGI server (like gunicorn) imports this file.
