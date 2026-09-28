@@ -55,7 +55,7 @@ saveBtn.addEventListener("click", () => {
 // and the save handler without repeating code.
 function updateStatus(topic, enabled) {
   if (enabled && topic) {
-    statusEl.textContent = `Focus mode: ON for "${topic}"`;
+    statusEl.textContent = `Pathfinder is ON for "${topic}"`;
     statusEl.classList.add("active");       // turns text accent-coloured
   } else if (!enabled) {
     statusEl.textContent = "Focus mode: OFF";

@@ -3,7 +3,7 @@
 
   "name": "Pathfinder",
   "version": "1.0",
-  "description": "Stay on your path. Pathfinder keeps you focused by blocking off-topic YouTube videos.",
+  "description": "Stay on your path while you study.",
 
   "action": {
     "default_popup": "popup.html",

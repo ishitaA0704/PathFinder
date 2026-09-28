@@ -1,0 +1,137 @@
+/* blocker.css – Pathfinder lock overlay styles
+   This file is injected into every YouTube page by Chrome (see manifest.json).
+   The CSS classes are inert until content.js creates the overlay element
+   and adds it to the page DOM.
+
+   We prefix every class with "pf-" (Pathfinder) to avoid accidentally
+   colliding with YouTube's own CSS class names. */
+
+/* ── Full-page dark overlay ────────────────────────────────────────────────── */
+.pf-overlay {
+  /* position: fixed means "stay in the viewport even if the user scrolls" */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;    /* 100% of the viewport width */
+  height: 100vh;   /* 100% of the viewport height */
+
+  /* Dark semi-transparent backdrop + blurred background */
+  background: rgba(10, 9, 20, 0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);   /* Safari prefix */
+
+  /* Stack above everything YouTube renders (its player is z-index ~1800) */
+  z-index: 9999999;
+
+  /* Center the inner card both horizontally and vertically */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Fade in smoothly rather than popping in abruptly */
+  animation: pf-fadein 0.35s ease forwards;
+}
+
+/* ── Fade-in keyframe ──────────────────────────────────────────────────────── */
+@keyframes pf-fadein {
+  from { opacity: 0; transform: scale(1.02); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Inner card ────────────────────────────────────────────────────────────── */
+.pf-card {
+  background: #1a1827;
+  border: 1px solid rgba(108, 99, 255, 0.3);
+  border-radius: 18px;
+  padding: 40px 36px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(108, 99, 255, 0.2), 0 24px 48px rgba(0,0,0,0.6);
+
+  /* Subtle slide-up as card enters */
+  animation: pf-slideup 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pf-slideup {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Icon ──────────────────────────────────────────────────────────────────── */
+.pf-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  display: block;
+
+  /* Pulse animation to grab attention */
+  animation: pf-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pf-pulse {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%       { transform: scale(1.08); opacity: 0.85; }
+}
+
+/* ── Heading ───────────────────────────────────────────────────────────────── */
+.pf-heading {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fffffe;
+  margin-bottom: 14px;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+/* ── Accent span inside heading ────────────────────────────────────────────── */
+.pf-accent {
+  color: #6c63ff;
+}
+
+/* ── Body text (topic line) ────────────────────────────────────────────────── */
+.pf-body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 0.9rem;
+  color: #a7a9be;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* ── Topic pill ────────────────────────────────────────────────────────────── */
+.pf-topic {
+  display: inline-block;
+  background: rgba(108, 99, 255, 0.15);
+  color: #6c63ff;
+  border: 1px solid rgba(108, 99, 255, 0.35);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* ── "Go back" dismiss button ──────────────────────────────────────────────── */
+.pf-btn {
+  display: inline-block;
+  padding: 10px 28px;
+  background: #6c63ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.pf-btn:hover {
+  background: #5a52d5;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+}
+
+.pf-btn:active {
+  transform: translateY(0);
+}
