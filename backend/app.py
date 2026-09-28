@@ -10,6 +10,8 @@ from flask_cors import CORS  # allows the Chrome extension (a different "origin"
 
 from extensions import db  # the shared SQLAlchemy object
 from models import VideoLog  # the table we write to on every /check-title call
+from services.gemini_client import GeminiUnavailableError, get_gemini_score
+from services.fallback_classifier import score_title
 
 # ---------------------------------------------------------------------------
 # CONSTANT: the single place that controls "allowed vs. blocked"
@@ -114,10 +116,34 @@ def create_app():
             )
 
         # ── Scoring ──────────────────────────────────────────────────────────
-        # TODO (next step): call gemini_client, fall back to fallback_classifier.
-        # For now we use a dummy score so we can test the database and routing logic.
-        score = 1.0
-        mode = "fallback"
+        # Read FORCE_FALLBACK from the environment each request (not once at startup)
+        # so you can toggle it by editing .env and restarting, handy for demos.
+        force_fallback = os.environ.get("FORCE_FALLBACK", "false").lower() == "true"
+
+        if force_fallback:
+            # Skip Gemini entirely.  Useful when demoing offline or when you
+            # want a deterministic result without burning API quota.
+            score = score_title(title, focus_topic)
+            mode = "fallback"
+        else:
+            # ── Try Gemini first ─────────────────────────────────────────────
+            # The try block runs normally.  If Gemini works, 'mode' becomes
+            # "gemini" and we skip the except block entirely.
+            try:
+                score = get_gemini_score(title, focus_topic)
+                mode = "gemini"
+
+            except GeminiUnavailableError as e:
+                # ── Fallback ─────────────────────────────────────────────────
+                # Gemini failed for SOME reason (no key, no internet, timeout,
+                # rate limit, bad response).  We don't crash – we gracefully
+                # switch to the local classifier.
+                # 'as e' captures the error message so we can log it to the
+                # server console for debugging, but we don't expose it to the
+                # extension (no need to leak internal errors).
+                print(f"[Pathfinder] Gemini unavailable, using fallback. Reason: {e}")
+                score = score_title(title, focus_topic)
+                mode = "fallback"
 
         # Apply the threshold: score >= 0.6 means "on your path", allow the video.
         allowed = score >= RELEVANCE_THRESHOLD
