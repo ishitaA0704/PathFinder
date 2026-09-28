@@ -1,17 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <style>
-    body { width: 250px; padding: 15px; font-family: system-ui; }
-    input { width: 90%; padding: 8px; margin: 10px 0; }
-    button { width: 100%; padding: 10px; cursor: pointer; background: #007bff; color: white; border: none; }
-  </style>
+  <meta charset="UTF-8" />
+  <!--
+    viewport meta: makes the popup layout consistent across different screen
+    densities (e.g. HiDPI / Retina displays).
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pathfinder</title>
+  <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-  <h3>Current Focus</h3>
-  <input type="text" id="focus-topic" placeholder="e.g., Linear Algebra">
-  <button id="save-btn">Set Focus</button>
-  <div id="status"></div>
+
+  <div class="card">
+
+    <!-- ── Branding ─────────────────────────────────────────────────────── -->
+    <div class="header">
+      <span class="logo">🧭</span>
+      <div>
+        <h1 class="title">Pathfinder</h1>
+        <p class="tagline">Stay on your path.</p>
+      </div>
+    </div>
+
+    <!-- ── Focus topic input ─────────────────────────────────────────────── -->
+    <label class="field-label" for="topic-input">Focus topic</label>
+    <input
+      id="topic-input"
+      class="topic-input"
+      type="text"
+      placeholder="e.g. DBMS exam prep"
+      maxlength="120"
+    />
+
+    <!-- ── Enable / disable toggle ──────────────────────────────────────── -->
+    <div class="toggle-row">
+      <span class="toggle-label">Focus mode</span>
+
+      <!--
+        A checkbox styled as a pill toggle.
+        The <label for="toggle"> wraps both the hidden checkbox and the
+        visible pill, so clicking anywhere on the pill checks/unchecks it.
+      -->
+      <label class="toggle-wrap" for="toggle">
+        <input id="toggle" type="checkbox" />
+        <span class="pill"></span>
+      </label>
+    </div>
+
+    <!-- ── Save button ───────────────────────────────────────────────────── -->
+    <button id="save-btn" class="save-btn">Save</button>
+
+    <!-- ── Status line ───────────────────────────────────────────────────── -->
+    <!--
+      This paragraph is updated by popup.js whenever the user saves or when
+      the popup first opens (to show the persisted state).
+    -->
+    <p id="status" class="status"></p>
+
+  </div>
+
+  <!--
+    The script tag is at the BOTTOM of the body, after all HTML elements.
+    This guarantees that getElementById() calls in popup.js will find the
+    elements, because the browser has already parsed them by this point.
+  -->
   <script src="popup.js"></script>
 </body>
 </html>
