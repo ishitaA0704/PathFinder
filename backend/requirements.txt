@@ -5,4 +5,9 @@ flask==3.1.1
 flask-cors==5.0.1
 flask-sqlalchemy==3.1.1
 python-dotenv==1.1.0
+
+# The official Google Gemini Python SDK.
+# Note: the package was renamed from "google-generativeai" to "google-genai"
+# in 2024. We use the old package (still maintained) because its import path
+# "import google.generativeai as genai" matches our gemini_client.py code.
 google-generativeai==0.8.5

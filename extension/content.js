@@ -91,9 +91,12 @@ function waitForTitle(callback) {
 // ── Extract the video title from the DOM ──────────────────────────────────────
 function extractTitle() {
   // Primary source: YouTube's h1 element inside the watch page.
-  // This selector targets the visible large heading above the video.
-  // We call .trim() to remove surrounding whitespace.
-  const h1 = document.querySelector("h1.ytd-watch-metadata yt-formatted-string");
+  // We try two selectors because YouTube's DOM structure varies by layout version.
+  const h1 =
+    document.querySelector("h1.ytd-watch-metadata yt-formatted-string") ||
+    document.querySelector("ytd-watch-metadata h1 yt-formatted-string")  ||
+    document.querySelector("h1.ytd-watch-metadata");
+
   if (h1 && h1.textContent.trim()) {
     return h1.textContent.trim();
   }
@@ -122,7 +125,22 @@ function checkTitle(title) {
   // The second argument is the callback that receives background.js's reply.
   // This is ASYNCHRONOUS: the current function returns immediately and the
   // callback runs later when background.js has finished calling Flask.
+  //
+  // Safety timeout: MV3 service workers can be killed by Chrome between events.
+  // If that happens after we send the message but before background.js replies,
+  // the callback would never fire and the tab would silently hang.
+  // We set a 10-second timer; if no reply arrives, we allow the video and log a warning.
+  let responded = false;
+  const safetyTimer = setTimeout(() => {
+    if (!responded) {
+      console.warn("[Pathfinder] No response from background within 10 s – allowing video.");
+    }
+  }, 10000);
+
   chrome.runtime.sendMessage({ type: "CHECK_TITLE", title: title }, (response) => {
+    responded = true;
+    clearTimeout(safetyTimer);
+
     // If the extension context was invalidated (e.g. extension was reloaded
     // mid-session), chrome.runtime.lastError will be set. Guard against it.
     if (chrome.runtime.lastError) {
@@ -166,11 +184,14 @@ function showOverlay(title, response) {
   // Don't stack two overlays if one is already showing.
   if (document.getElementById("pf-overlay")) return;
 
-  const topic     = response.focus_topic || "";  // may be empty if bg didn't echo it
-  const score     = typeof response.score === "number"
-                    ? (response.score * 100).toFixed(0) + "% relevant"
-                    : "";
-  const mode      = response.mode ? `via ${response.mode}` : "";
+  // response.score comes from Flask. Convert to a readable percentage.
+  const score = typeof response.score === "number"
+                ? (response.score * 100).toFixed(0) + "% relevant"
+                : "";
+  // response.mode is "gemini" or "fallback" – display which engine decided.
+  const mode = response.mode && response.mode !== "off"
+               ? `via ${response.mode}`
+               : "";
 
   // ── Outer full-screen overlay ─────────────────────────────────────────────
   const overlay = document.createElement("div");
@@ -191,22 +212,16 @@ function showOverlay(title, response) {
   heading.className = "pf-heading";
   heading.innerHTML = `<span class="pf-accent">Off your path</span>`;
 
-  // Sub-text — we build this safely without innerHTML to avoid XSS
-  // (a video title could theoretically contain HTML characters).
+  // Sub-text — built with textContent (not innerHTML) to prevent XSS.
   const body = document.createElement("p");
   body.className = "pf-body";
   body.textContent = `Pathfinder paused this video because it doesn't match your focus:`;
 
-  // Topic pill
+  // Topic pill – populated by loadTopicAndRender after async storage read.
   const topicPill = document.createElement("span");
   topicPill.className = "pf-topic";
-  // chrome.storage isn't available here synchronously, but background.js
-  // reads storage and we can request it if needed. For now we pull from
-  // storage directly to show the topic on the overlay.
-  loadTopicAndRender(topicPill, body, score, mode, card, icon, heading, overlay);
 
-  // We hand off to loadTopicAndRender() which reads storage asynchronously,
-  // so we return here. The rest of the overlay is assembled inside that function.
+  loadTopicAndRender(topicPill, body, score, mode, card, icon, heading, overlay);
 }
 
 // Reads focus_topic from storage (async), then finishes building the overlay.
