@@ -76,10 +76,3 @@ Pathfinder is an AI-powered Chrome extension designed to eliminate YouTube rabbi
 4. Go to YouTube and try watching a video about video games or cooking—Pathfinder will block it!
 5. Search for a tutorial related to your topic—Pathfinder will let it play seamlessly.
 
----
-
-## 📖 Deep Dive
-
-Curious about the technical decisions, architecture, or how to explain this project to hackathon judges? 
-
-Check out the [EXPLAINED.md](./EXPLAINED.md) file included in this repository for an in-depth breakdown of the code, request flow, and potential interview questions.
