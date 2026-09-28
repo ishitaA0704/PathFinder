@@ -1,40 +1,38 @@
 /* blocker.css – Pathfinder lock overlay styles
-   This file is injected into every YouTube page by Chrome (see manifest.json).
-   The CSS classes are inert until content.js creates the overlay element
-   and adds it to the page DOM.
-
-   We prefix every class with "pf-" (Pathfinder) to avoid accidentally
-   colliding with YouTube's own CSS class names. */
+   Injected as a <style> block into every YouTube page by Chrome.
+   Classes are inert until content.js creates DOM elements and assigns them.
+   All class names are prefixed "pf-" to avoid colliding with YouTube's CSS. */
 
 /* ── Full-page dark overlay ────────────────────────────────────────────────── */
 .pf-overlay {
-  /* position: fixed means "stay in the viewport even if the user scrolls" */
+  /* position: fixed pins the overlay to the viewport, not the page.
+     It stays in place even if the user scrolls. */
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;    /* 100% of the viewport width */
-  height: 100vh;   /* 100% of the viewport height */
+  width: 100vw;    /* 100% of the visible viewport width  */
+  height: 100vh;   /* 100% of the visible viewport height */
 
-  /* Dark semi-transparent backdrop + blurred background */
+  /* Near-opaque dark backdrop. backdrop-filter blurs whatever is behind it. */
   background: rgba(10, 9, 20, 0.96);
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);   /* Safari prefix */
+  -webkit-backdrop-filter: blur(8px);  /* required for Safari */
 
-  /* Stack above everything YouTube renders (its player is z-index ~1800) */
+  /* Stack above everything YouTube renders.
+     YouTube's player controls sit at z-index ~1800; we beat them all. */
   z-index: 9999999;
 
-  /* Center the inner card both horizontally and vertically */
+  /* Flexbox to center the inner card both horizontally and vertically. */
   display: flex;
   align-items: center;
   justify-content: center;
 
-  /* Fade in smoothly rather than popping in abruptly */
-  animation: pf-fadein 0.35s ease forwards;
+  /* Fade + very slight shrink-in on appearance */
+  animation: pf-fadein 0.3s ease forwards;
 }
 
-/* ── Fade-in keyframe ──────────────────────────────────────────────────────── */
 @keyframes pf-fadein {
-  from { opacity: 0; transform: scale(1.02); }
+  from { opacity: 0; transform: scale(1.03); }
   to   { opacity: 1; transform: scale(1); }
 }
 
@@ -43,95 +41,128 @@
   background: #1a1827;
   border: 1px solid rgba(108, 99, 255, 0.3);
   border-radius: 18px;
-  padding: 40px 36px;
-  max-width: 420px;
+  padding: 40px 36px 32px;
+  max-width: 440px;
+  width: 90%;               /* responsive on narrow viewports */
   text-align: center;
-  box-shadow: 0 0 60px rgba(108, 99, 255, 0.2), 0 24px 48px rgba(0,0,0,0.6);
+  box-shadow:
+    0 0 60px rgba(108, 99, 255, 0.18),
+    0 24px 48px rgba(0, 0, 0, 0.6);
 
-  /* Subtle slide-up as card enters */
+  /* Card slides up as it appears */
   animation: pf-slideup 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes pf-slideup {
-  from { transform: translateY(24px); opacity: 0; }
+  from { transform: translateY(28px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
 }
 
-/* ── Icon ──────────────────────────────────────────────────────────────────── */
+/* ── Lock icon ─────────────────────────────────────────────────────────────── */
 .pf-icon {
-  font-size: 3rem;
-  margin-bottom: 12px;
+  font-size: 2.8rem;
   display: block;
-
-  /* Pulse animation to grab attention */
-  animation: pf-pulse 2.5s ease-in-out infinite;
+  margin-bottom: 14px;
+  /* Gentle pulse to draw the eye without being distracting */
+  animation: pf-pulse 2.8s ease-in-out infinite;
 }
 
 @keyframes pf-pulse {
   0%, 100% { transform: scale(1);    opacity: 1; }
-  50%       { transform: scale(1.08); opacity: 0.85; }
+  50%       { transform: scale(1.1); opacity: 0.8; }
 }
 
-/* ── Heading ───────────────────────────────────────────────────────────────── */
+/* ── Heading ("Off your path") ─────────────────────────────────────────────── */
 .pf-heading {
-  font-family: 'Inter', -apple-system, sans-serif;
-  font-size: 1.4rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #fffffe;
-  margin-bottom: 14px;
-  letter-spacing: -0.3px;
-  line-height: 1.3;
+  margin-bottom: 12px;
+  letter-spacing: -0.4px;
+  line-height: 1.25;
 }
 
-/* ── Accent span inside heading ────────────────────────────────────────────── */
+/* The purple "Off your path" accent text */
 .pf-accent {
   color: #6c63ff;
 }
 
-/* ── Body text (topic line) ────────────────────────────────────────────────── */
+/* ── Body text ─────────────────────────────────────────────────────────────── */
 .pf-body {
-  font-family: 'Inter', -apple-system, sans-serif;
-  font-size: 0.9rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.92rem;
   color: #a7a9be;
   line-height: 1.6;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
 }
 
 /* ── Topic pill ────────────────────────────────────────────────────────────── */
 .pf-topic {
   display: inline-block;
-  background: rgba(108, 99, 255, 0.15);
+  background: rgba(108, 99, 255, 0.12);
   color: #6c63ff;
   border: 1px solid rgba(108, 99, 255, 0.35);
   border-radius: 999px;
-  padding: 3px 12px;
+  padding: 4px 14px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
-  margin-top: 4px;
+  margin-bottom: 16px;
 }
 
-/* ── "Go back" dismiss button ──────────────────────────────────────────────── */
+/* ── Score / mode metadata line ────────────────────────────────────────────── */
+.pf-meta {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.75rem;
+  color: #5c5e73;           /* dim, so it doesn't distract from the main message */
+  margin-bottom: 24px;
+  letter-spacing: 0.2px;
+}
+
+/* ── Button row ────────────────────────────────────────────────────────────── */
+.pf-btn-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;           /* wraps to two lines on very narrow screens */
+}
+
+/* ── Shared button base ────────────────────────────────────────────────────── */
 .pf-btn {
-  display: inline-block;
-  padding: 10px 28px;
-  background: #6c63ff;
-  color: #fff;
-  border: none;
+  padding: 10px 22px;
   border-radius: 8px;
-  font-family: 'Inter', -apple-system, sans-serif;
-  font-size: 0.9rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
+  border: none;
   letter-spacing: 0.2px;
   transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
-.pf-btn:hover {
+.pf-btn:hover  { transform: translateY(-1px); }
+.pf-btn:active { transform: translateY(0); }
+
+/* ── Primary: "Go back" ─────────────────────────────────────────────────────── */
+.pf-btn-primary {
+  background: #6c63ff;
+  color: #fff;
+}
+
+.pf-btn-primary:hover {
   background: #5a52d5;
-  transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
 }
 
-.pf-btn:active {
-  transform: translateY(0);
+/* ── Ghost: "Continue anyway (5 min)" ──────────────────────────────────────── */
+.pf-btn-ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: #a7a9be;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pf-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fffffe;
 }
