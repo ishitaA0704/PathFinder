@@ -12,7 +12,7 @@ import google.generativeai as genai
 # "flash" models are small and fast – ideal for a quick relevance check.
 # Keeping the name here means you only change one line if Google releases
 # a newer model.
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = "gemini-3.8-flash"
 
 # How many seconds to wait for Gemini before giving up.
 # 5 s is long enough for the API on a good connection, short enough

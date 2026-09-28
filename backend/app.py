@@ -141,7 +141,7 @@ def create_app():
                 # 'as e' captures the error message so we can log it to the
                 # server console for debugging, but we don't expose it to the
                 # extension (no need to leak internal errors).
-                print(f"[Pathfinder] Gemini unavailable, using fallback. Reason: {e}")
+                print(f"[Pathfinder] Gemini unavailable, using fallback. Reason: {e}", flush=True)
                 score = score_title(title, focus_topic)
                 mode = "fallback"
 
