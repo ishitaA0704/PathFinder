@@ -1,0 +1,21 @@
+# Environments
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+
+# SQLite
+*.db
+*.sqlite3
+instance/
+
+# OS generated files
+.DS_Store
+Thumbs.db
