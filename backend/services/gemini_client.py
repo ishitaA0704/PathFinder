@@ -15,9 +15,9 @@ import google.generativeai as genai
 GEMINI_MODEL = "gemini-3.8-flash"
 
 # How many seconds to wait for Gemini before giving up.
-# 5 s is long enough for the API on a good connection, short enough
+# 15 s is long enough for the API on a good connection, short enough
 # that the extension doesn't leave the user waiting forever.
-GEMINI_TIMEOUT_SECONDS = 5
+GEMINI_TIMEOUT_SECONDS = 15
 
 
 # ── Custom exception ─────────────────────────────────────────────────────────
@@ -61,14 +61,12 @@ def get_gemini_score(title: str, topic: str) -> float:
         raise GeminiUnavailableError("GEMINI_API_KEY is not set or is still the placeholder value.")
 
     # ── Step 2: configure the SDK ─────────────────────────────────────────────
-    # genai.configure() sets a module-level API key that every subsequent
-    # SDK call will use.  This is the pattern shown in the official docs.
-    genai.configure(api_key=api_key)
+    # We use transport="rest" because the default gRPC transport can sometimes
+    # hang or timeout when running inside a Flask multi-threaded environment.
+    genai.configure(api_key=api_key, transport="rest")
 
     # ── Step 3: build the prompt ──────────────────────────────────────────────
     # We ask for ONLY a number so that parsing is trivial.
-    # The prompt explains the scoring rubric so Gemini doesn't have to guess
-    # what "relevant" means in an academic context.
     prompt = (
         f"You are a study assistant. A student is focusing on the topic: '{topic}'.\n"
         f"Rate how relevant this YouTube video title is to their study session:\n"
@@ -81,18 +79,12 @@ def get_gemini_score(title: str, topic: str) -> float:
     )
 
     # ── Step 4: call the API inside a try/except ──────────────────────────────
-    # We wrap the ENTIRE network call so that ANY failure — connection refused,
-    # DNS error, rate limit HTTP 429, SDK exception — is caught and re-raised
-    # as our own GeminiUnavailableError.
     try:
         model = genai.GenerativeModel(GEMINI_MODEL)
-
-        # request_options lets us set a wall-clock timeout.
-        # If Gemini takes longer than GEMINI_TIMEOUT_SECONDS, the SDK raises
-        # a google.api_core.exceptions.DeadlineExceeded which we catch below.
+        
         response = model.generate_content(
             prompt,
-            request_options={"timeout": GEMINI_TIMEOUT_SECONDS},
+            request_options={"timeout": GEMINI_TIMEOUT_SECONDS}
         )
 
         # response.text is the raw string the model returned, e.g. "0.87\n"
